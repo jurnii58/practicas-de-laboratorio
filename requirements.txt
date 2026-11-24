@@ -1,0 +1,6 @@
+fastapi[standard]>=0.115
+SQLAlchemy>=2.0
+pytest>=8
+ruff>=0.6
+alembic>=1.13
+itsdangerous>=2.2
