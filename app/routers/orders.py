@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from ..permisos import requiere_admin
 from ..repository_sql import SqlOrderRepository, get_repo
 from ..schemas import OrderIn, OrderOut, OrderStatus
 
@@ -35,7 +36,11 @@ def obtener_orden(order_id: int, repo: Repo) -> OrderOut:
     return order
 
 
-@router.put("/{order_id}", response_model=OrderOut)
+@router.put(
+    "/{order_id}",
+    response_model=OrderOut,
+    dependencies=[Depends(requiere_admin)],
+)
 def actualizar_orden(order_id: int, data: OrderIn, repo: Repo) -> OrderOut:
     order = repo.update(order_id, data)
     if order is None:
@@ -43,7 +48,11 @@ def actualizar_orden(order_id: int, data: OrderIn, repo: Repo) -> OrderOut:
     return order
 
 
-@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{order_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(requiere_admin)],
+)
 def eliminar_orden(order_id: int, repo: Repo) -> Response:
     if not repo.delete(order_id):
         raise HTTPException(status_code=404, detail="Orden no encontrada")

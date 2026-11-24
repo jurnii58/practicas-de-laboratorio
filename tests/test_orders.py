@@ -1,6 +1,7 @@
-"""Pruebas de la API de Órdenes. Ejecutar con: pytest -v"""
+"""Pruebas de la API de Órdenes. La fixture `client` está en conftest.py."""
 
 ORDEN = {"cliente": "Ana López", "producto": "Teclado", "cantidad": 2, "precio_unitario": 350.0}
+
 
 def test_crear_orden_calcula_total(client):
     r = client.post("/orders", json=ORDEN)
@@ -22,13 +23,14 @@ def test_obtener_orden_inexistente_devuelve_404(client):
     assert r.json()["detail"] == "Orden no encontrada"
 
 
-def test_listar_actualizar_y_eliminar(client):
+def test_listar_actualizar_y_eliminar(client, headers_de):
+    admin = headers_de("admin")  # desde el Tema 6, modificar y borrar requiere admin
     client.post("/orders", json=ORDEN)
     assert len(client.get("/orders").json()) == 1
 
-    r = client.put("/orders/1", json={**ORDEN, "cantidad": 3})
+    r = client.put("/orders/1", json={**ORDEN, "cantidad": 3}, headers=admin)
     assert r.status_code == 200
     assert r.json()["total"] == 1050.0
 
-    assert client.delete("/orders/1").status_code == 204
+    assert client.delete("/orders/1", headers=admin).status_code == 204
     assert client.get("/orders/1").status_code == 404

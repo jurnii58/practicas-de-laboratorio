@@ -8,6 +8,8 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import Base, get_session
 from app.main import app
+from app.repository_usuarios import SqlUsuarioRepository
+from app.schemas import UsuarioIn
 from app.services.almacen import ProductoNoRegistrado, get_almacen_service
 from app.services.clientes import ServicioNoDisponible, get_clientes_service
 from app.storage import get_upload_dir
@@ -81,3 +83,22 @@ def client(clientes, almacen, sesiones, carpeta):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+PASSWORD = "secreto123"
+
+
+@pytest.fixture
+def headers_de(client, sesiones):
+    """Crea un usuario con el rol indicado, inicia sesión y devuelve el encabezado
+    Authorization listo para usar: client.delete(..., headers=headers_de("admin"))."""
+
+    def crear(rol: str = "cliente") -> dict[str, str]:
+        email = f"{rol}@utvt.edu.mx"
+        with sesiones() as session:
+            datos = UsuarioIn(email=email, nombre=f"Usuario {rol}", password=PASSWORD)
+            SqlUsuarioRepository(session).crear(datos, rol=rol)
+        r = client.post("/auth/token", data={"username": email, "password": PASSWORD})
+        return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+    return crear

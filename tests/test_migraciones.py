@@ -13,7 +13,7 @@ def test_las_migraciones_crean_las_tablas(tmp_path):
     command.upgrade(config, "head")
 
     tablas = inspect(create_engine(url)).get_table_names()
-    assert {"orders", "comprobantes"} <= set(tablas)
+    assert {"orders", "comprobantes", "usuarios"} <= set(tablas)
 
     command.downgrade(config, "base")  # y también se pueden revertir
     assert inspect(create_engine(url)).get_table_names() == ["alembic_version"]

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from .db import engine  # noqa: F401
-from .routers import carrito, comprobantes, orders, productos, web
+from .routers import auth, carrito, comprobantes, orders, productos, web
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="API de Órdenes", version="0.2.0", lifespan=lifespan)
+app.include_router(auth.router)
 app.include_router(orders.router)
 app.include_router(productos.router)
 app.include_router(web.router)

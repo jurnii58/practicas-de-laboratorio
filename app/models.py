@@ -46,3 +46,15 @@ class ComprobanteModel(Base):
 
     # Lado "muchos": cada comprobante pertenece a una orden
     orden: Mapped[OrderModel] = relationship(back_populates="comprobantes")
+
+
+class UsuarioModel(Base):
+    __tablename__ = "usuarios"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)  # no puede repetirse
+    nombre: Mapped[str] = mapped_column(String(80))
+    password_hash: Mapped[str] = mapped_column(String(255))  # el hash, no la contraseña
+    rol: Mapped[str] = mapped_column(String(20), default="cliente")  # "cliente" o "admin"
+    creado: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
